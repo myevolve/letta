@@ -56,6 +56,14 @@ services:
     # Uncomment this line to mount a local directory for tool execution, and specify the mount path
     # before running docker compose: `export LETTA_SANDBOX_MOUNT_PATH=$PWD/directory`
     # - ${LETTA_SANDBOX_MOUNT_PATH:?}:/root/.letta/tool_execution_dir # mounted volume for tool execution
+  letta_frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    ports:
+      - "3000:3000"
+    depends_on:
+      - letta_server
   letta_nginx:
     hostname: letta-nginx
     image: nginx:stable-alpine3.17-slim
