@@ -3,9 +3,10 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import useAuthStore from "@/lib/stores/useAuthStore";
+import React from "react";
 
-const withAuth = (WrappedComponent: React.ComponentType<any>) => {
-  const Wrapper = (props: any) => {
+const withAuth = <P extends object>(WrappedComponent: React.ComponentType<P>) => {
+  const Wrapper: React.FC<P> = (props) => {
     const router = useRouter();
     const { token } = useAuthStore();
 

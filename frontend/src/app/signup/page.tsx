@@ -52,8 +52,12 @@ export default function SignupPage() {
 
       // Handle successful signup, e.g., redirect to login
       window.location.href = "/login";
-    } catch (error) {
-      setError("An unexpected error occurred");
+    } catch (err) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError("An unexpected error occurred");
+      }
     }
   };
 

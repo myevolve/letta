@@ -16,6 +16,12 @@ import { useState } from "react";
 import useAuthStore from "@/lib/stores/useAuthStore";
 import { jwtDecode } from "jwt-decode";
 
+interface DecodedToken {
+  sub: string;
+  name: string;
+  role: string;
+}
+
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -45,18 +51,22 @@ export default function LoginPage() {
       }
 
       const data = await response.json();
-      const decodedToken: any = jwtDecode(data.access_token);
+      const decodedToken: DecodedToken = jwtDecode(data.access_token);
       setToken(data.access_token);
       setUser({
-        id: decodedToken.sub, // The 'sub' field in the JWT is the user's email
-        name: decodedToken.name, // Assuming the name is in the token
+        id: decodedToken.sub,
+        name: decodedToken.name,
         email: decodedToken.sub,
         role: decodedToken.role,
       });
       // Redirect to a protected page
       window.location.href = "/dashboard";
-    } catch (error) {
-      setError("An unexpected error occurred");
+    } catch (err) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError("An unexpected error occurred");
+      }
     }
   };
 
@@ -99,7 +109,7 @@ export default function LoginPage() {
           <CardFooter className="flex flex-col">
             <Button type="submit" className="w-full">Log In</Button>
             <div className="mt-4 text-center text-sm">
-              Don't have an account?{" "}
+              Don&apos;t have an account?{" "}
               <Link href="/signup" className="underline">
                 Sign Up
               </Link>
