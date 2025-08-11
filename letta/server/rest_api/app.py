@@ -344,7 +344,7 @@ def create_application() -> "FastAPI":
     app.include_router(openai_chat_completions_router, prefix=OPENAI_API_PREFIX)
 
     # /api/auth endpoints
-    app.include_router(setup_auth_router(server, interface, random_password), prefix=API_PREFIX)
+    # app.include_router(setup_auth_router(server, interface, random_password), prefix=API_PREFIX)
 
     # / static files
     mount_static_files(app)
