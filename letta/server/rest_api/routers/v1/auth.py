@@ -2,14 +2,14 @@ from fastapi import APIRouter, Body, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from datetime import timedelta
 
-from letta.schemas.user import UserCreate, User
+from letta.schemas.user import UserCreate, User, UserOut
 from letta.services.user_manager import UserManager
 from letta.server.rest_api.auth_utils.password import get_password_hash, verify_password
 from letta.server.rest_api.auth_utils.jwt import create_access_token, ACCESS_TOKEN_EXPIRE_MINUTES
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
-@router.post("/signup", response_model=User)
+@router.post("/signup", response_model=UserOut)
 async def signup(
     user_create: UserCreate,
 ):
