@@ -17,6 +17,9 @@ class User(SqlalchemyBase, OrganizationMixin):
     __pydantic_model__ = PydanticUser
 
     name: Mapped[str] = mapped_column(nullable=False, doc="The display name of the user.")
+    email: Mapped[str] = mapped_column(nullable=False, unique=True, doc="The email of the user.", server_default='')
+    password: Mapped[str] = mapped_column(nullable=False, doc="The hashed password of the user.", server_default='')
+    role: Mapped[str] = mapped_column(nullable=False, doc="The role of the user.", server_default='User')
 
     # relationships
     organization: Mapped["Organization"] = relationship("Organization", back_populates="users")

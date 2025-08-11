@@ -152,6 +152,20 @@ class UserManager:
 
     @enforce_types
     @trace_method
+    def get_user_by_email(self, email: str) -> Optional[PydanticUser]:
+        """Fetch a user by email."""
+        with db_registry.session() as session:
+            stmt = select(UserModel).where(UserModel.email == email)
+            result = session.execute(stmt)
+            user = result.scalar_one_or_none()
+
+            if not user:
+                return None
+
+            return user.to_pydantic()
+
+    @enforce_types
+    @trace_method
     @async_redis_cache(key_func=lambda self, actor_id: f"actor_id:{actor_id}", model_class=PydanticUser)
     async def get_actor_by_id_async(self, actor_id: str) -> PydanticUser:
         """Fetch a user by ID asynchronously."""
@@ -162,6 +176,20 @@ class UserManager:
 
             if not user:
                 raise NoResultFound(f"User not found with id={actor_id}")
+
+            return user.to_pydantic()
+
+    @enforce_types
+    @trace_method
+    async def get_actor_by_email_async(self, email: str) -> Optional[PydanticUser]:
+        """Fetch a user by email asynchronously."""
+        async with db_registry.async_session() as session:
+            stmt = select(UserModel).where(UserModel.email == email)
+            result = await session.execute(stmt)
+            user = result.scalar_one_or_none()
+
+            if not user:
+                return None
 
             return user.to_pydantic()
 
