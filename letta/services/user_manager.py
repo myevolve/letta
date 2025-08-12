@@ -72,7 +72,7 @@ class UserManager:
     def create_user(self, pydantic_user: PydanticUser) -> PydanticUser:
         """Create a new user if it doesn't already exist."""
         with db_registry.session() as session:
-            new_user = UserModel(**pydantic_user.model_dump(to_orm=True))
+            new_user = UserModel(id=pydantic_user.id, **pydantic_user.model_dump(to_orm=True, exclude={"id"}))
             new_user.create(session)
             return new_user.to_pydantic()
 
@@ -81,7 +81,7 @@ class UserManager:
     async def create_actor_async(self, pydantic_user: PydanticUser) -> PydanticUser:
         """Create a new user if it doesn't already exist (async version)."""
         async with db_registry.async_session() as session:
-            new_user = UserModel(**pydantic_user.model_dump(to_orm=True))
+            new_user = UserModel(id=pydantic_user.id, **pydantic_user.model_dump(to_orm=True, exclude={"id"}))
             await new_user.create_async(session)
             await self._invalidate_actor_cache(new_user.id)
             return new_user.to_pydantic()
