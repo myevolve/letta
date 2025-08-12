@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import Header from "@/components/layout/Header";
+import GlobalSidebar from "@/components/layout/GlobalSidebar";
+import ProjectSidebar from "@/components/layout/ProjectSidebar";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -28,7 +31,12 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-gray-900 text-white`}
       >
         <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-blue-500 to-purple-600 opacity-20 blur-3xl"></div>
-        <main className="relative z-10">{children}</main>
+        <GlobalSidebar />
+        <ProjectSidebar />
+        <div className="ml-84"> {/* 20 (GlobalSidebar) + 64 (ProjectSidebar) = 84 */}
+          <Header />
+          <main className="relative z-10 pt-16">{children}</main>
+        </div>
       </body>
     </html>
   );
