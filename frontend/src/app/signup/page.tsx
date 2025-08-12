@@ -13,20 +13,27 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+import useAuthStore from "@/lib/stores/useAuthStore";
 
 export default function SignupPage() {
+  const router = useRouter();
+  const { setToken, setUser } = useAuthStore();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    setIsLoading(true);
 
     if (password !== confirmPassword) {
       setError("Passwords do not match");
+      setIsLoading(false);
       return;
     }
 
@@ -40,24 +47,34 @@ export default function SignupPage() {
           name,
           email,
           password,
-          organization_id: "org_123", // Hardcoded for now
+          organization_id: "org-00000000-0000-4000-8000-000000000000",
         }),
       });
 
+      const data = await response.json();
+
       if (!response.ok) {
-        const data = await response.json();
         setError(data.detail || "Something went wrong");
         return;
       }
 
-      // Handle successful signup, e.g., redirect to login
-      window.location.href = "/login";
+      // Handle successful signup
+      if (data.access_token && data.user) {
+        setToken(data.access_token);
+        setUser(data.user);
+        router.push("/dashboard");
+      } else {
+        setError("Signup successful, but failed to log in. Please try logging in manually.");
+      }
+
     } catch (err) {
       if (err instanceof Error) {
         setError(err.message);
       } else {
         setError("An unexpected error occurred");
       }
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -78,6 +95,7 @@ export default function SignupPage() {
                 id="full-name"
                 placeholder="John Doe"
                 required
+                disabled={isLoading}
                 className="bg-black bg-opacity-30 border-gray-600"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
@@ -90,6 +108,7 @@ export default function SignupPage() {
                 type="email"
                 placeholder="m@example.com"
                 required
+                disabled={isLoading}
                 className="bg-black bg-opacity-30 border-gray-600"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -101,6 +120,7 @@ export default function SignupPage() {
                 id="password"
                 type="password"
                 required
+                disabled={isLoading}
                 className="bg-black bg-opacity-30 border-gray-600"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -112,6 +132,7 @@ export default function SignupPage() {
                 id="confirm-password"
                 type="password"
                 required
+                disabled={isLoading}
                 className="bg-black bg-opacity-30 border-gray-600"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
@@ -120,8 +141,8 @@ export default function SignupPage() {
             {error && <p className="text-red-500 text-sm">{error}</p>}
           </CardContent>
           <CardFooter className="flex flex-col">
-            <Button type="submit" className="w-full bg-orange-500 hover:bg-orange-600">
-              Create Account
+            <Button type="submit" className="w-full bg-orange-500 hover:bg-orange-600" disabled={isLoading}>
+              {isLoading ? "Creating Account..." : "Create Account"}
             </Button>
             <div className="mt-4 text-center text-sm">
               Already have an account?{" "}

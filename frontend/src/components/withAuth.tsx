@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import useAuthStore from "@/lib/stores/useAuthStore";
 import React from "react";
+import { MainLayout } from "./layout/MainLayout";
 
 const withAuth = <P extends object>(WrappedComponent: React.ComponentType<P>) => {
   const Wrapper: React.FC<P> = (props) => {
@@ -17,11 +18,19 @@ const withAuth = <P extends object>(WrappedComponent: React.ComponentType<P>) =>
     }, [token, router]);
 
     if (!token) {
-      return null; // or a loading spinner
+      // Return null or a loading spinner while redirecting
+      return null;
     }
 
-    return <WrappedComponent {...props} />;
+    return (
+      <MainLayout>
+        <WrappedComponent {...props} />
+      </MainLayout>
+    );
   };
+
+  // Assign a display name for better debugging
+  Wrapper.displayName = `withAuth(${WrappedComponent.displayName || WrappedComponent.name || 'Component'})`;
 
   return Wrapper;
 };

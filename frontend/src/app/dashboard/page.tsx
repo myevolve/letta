@@ -1,21 +1,30 @@
 "use client";
 
 import withAuth from "@/components/withAuth";
-import useAuthStore from "@/lib/stores/useAuthStore";
+import { Overview } from "@/components/dashboard/Overview";
+import { RecentWork } from "@/components/dashboard/RecentWork";
+import { Tutorials } from "@/components/dashboard/Tutorials";
 
 function DashboardPage() {
-    const { user, logout } = useAuthStore();
-
-    const handleLogout = () => {
-        logout();
-        window.location.href = "/login";
-    };
-
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen">
-      <h1 className="text-4xl">Welcome, {user?.name}</h1>
-      <p>Your role is: {user?.role}</p>
-      <button onClick={handleLogout} className="mt-4 p-2 bg-red-500 rounded">Logout</button>
+    <div className="space-y-8">
+      <div>
+        <h1 className="text-3xl font-bold">Dashboard</h1>
+        <p className="text-muted-foreground">
+          An overview of your projects and agents.
+        </p>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="lg:col-span-2">
+          <RecentWork />
+        </div>
+
+        <div className="space-y-8">
+          <Overview />
+          <Tutorials />
+        </div>
+      </div>
     </div>
   );
 }

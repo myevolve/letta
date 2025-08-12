@@ -14,23 +14,20 @@ import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import { useState } from "react";
 import useAuthStore from "@/lib/stores/useAuthStore";
-import { jwtDecode } from "jwt-decode";
-
-interface DecodedToken {
-  sub: string;
-  name: string;
-  role: string;
-}
+import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
+  const router = useRouter();
+  const { setToken, setUser } = useAuthStore();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const { setToken, setUser } = useAuthStore();
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    setIsLoading(true);
 
     try {
       const response = await fetch("/v1/auth/login/token", {
@@ -44,29 +41,29 @@ export default function LoginPage() {
         }),
       });
 
+      const data = await response.json();
+
       if (!response.ok) {
-        const data = await response.json();
         setError(data.detail || "Something went wrong");
         return;
       }
 
-      const data = await response.json();
-      const decodedToken: DecodedToken = jwtDecode(data.access_token);
-      setToken(data.access_token);
-      setUser({
-        id: decodedToken.sub,
-        name: decodedToken.name,
-        email: decodedToken.sub,
-        role: decodedToken.role,
-      });
-      // Redirect to a protected page
-      window.location.href = "/dashboard";
+      if (data.access_token && data.user) {
+        setToken(data.access_token);
+        setUser(data.user);
+        router.push("/dashboard");
+      } else {
+        setError("Login successful, but failed to retrieve user data. Please try again.");
+      }
+
     } catch (err) {
       if (err instanceof Error) {
         setError(err.message);
       } else {
         setError("An unexpected error occurred");
       }
+    } finally {
+        setIsLoading(false);
     }
   };
 
@@ -88,6 +85,7 @@ export default function LoginPage() {
                 type="email"
                 placeholder="m@example.com"
                 required
+                disabled={isLoading}
                 className="bg-black bg-opacity-30 border-gray-600"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -99,6 +97,7 @@ export default function LoginPage() {
                 id="password"
                 type="password"
                 required
+                disabled={isLoading}
                 className="bg-black bg-opacity-30 border-gray-600"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -107,7 +106,9 @@ export default function LoginPage() {
             {error && <p className="text-red-500 text-sm">{error}</p>}
           </CardContent>
           <CardFooter className="flex flex-col">
-            <Button type="submit" className="w-full">Log In</Button>
+            <Button type="submit" className="w-full" disabled={isLoading}>
+                {isLoading ? "Logging In..." : "Log In"}
+            </Button>
             <div className="mt-4 text-center text-sm">
               Don&apos;t have an account?{" "}
               <Link href="/signup" className="underline">
