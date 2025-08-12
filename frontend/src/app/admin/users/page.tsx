@@ -17,8 +17,16 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import UserForm from "@/components/admin/UserForm";
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
+import useAuthStore from "@/lib/stores/useAuthStore";
+import { MoreHorizontal } from "lucide-react";
 
 interface User {
     id: string;
@@ -29,33 +37,54 @@ interface User {
     lastLogin: string;
 }
 
-const users: User[] = [
-  {
-    id: "1",
-    name: "John Doe",
-    email: "john@example.com",
-    role: "Admin",
-    status: "Active",
-    lastLogin: "2023-10-27 10:00 AM",
-  },
-  {
-    id: "2",
-    name: "Jane Smith",
-    email: "jane@example.com",
-    role: "User",
-    status: "Active",
-    lastLogin: "2023-10-27 11:00 AM",
-  },
-];
-
 export default function UserManagementPage() {
+  const [users, setUsers] = useState<User[]>([]);
   const [isNewUserDialogOpen, setIsNewUserDialogOpen] = useState(false);
   const [isEditUserDialogOpen, setIsEditUserDialogOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const { token } = useAuthStore();
+
+  const fetchUsers = useCallback(async () => {
+    try {
+      const response = await fetch("/v1/admin/users/", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setUsers(data);
+      }
+    } catch (error) {
+      console.error("Failed to fetch users:", error);
+    }
+  }, [token]);
+
+  useEffect(() => {
+    if (token) {
+      fetchUsers();
+    }
+  }, [token, fetchUsers]);
 
   const handleEditClick = (user: User) => {
     setSelectedUser(user);
     setIsEditUserDialogOpen(true);
+  };
+
+  const handleDeleteClick = async (userId: string) => {
+    if (window.confirm("Are you sure you want to delete this user?")) {
+        try {
+            await fetch(`/v1/admin/users/?user_id=${userId}`, {
+                method: "DELETE",
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+            fetchUsers();
+        } catch (error) {
+            console.error("Failed to delete user:", error);
+        }
+    }
   };
 
   return (
@@ -78,6 +107,7 @@ export default function UserManagementPage() {
               onSubmit={() => {
                 // Handle form submission
                 setIsNewUserDialogOpen(false);
+                fetchUsers(); // Refetch users after creating a new one
               }}
               onCancel={() => setIsNewUserDialogOpen(false)}
             />
@@ -105,9 +135,22 @@ export default function UserManagementPage() {
                 <TableCell>{user.status}</TableCell>
                 <TableCell>{user.lastLogin}</TableCell>
                 <TableCell>
-                  <Button variant="ghost" onClick={() => handleEditClick(user)}>
-                    Edit
-                  </Button>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" className="h-8 w-8 p-0">
+                        <span className="sr-only">Open menu</span>
+                        <MoreHorizontal className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem onClick={() => handleEditClick(user)}>
+                        Edit
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => handleDeleteClick(user.id)}>
+                        Delete
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </TableCell>
               </TableRow>
             ))}
@@ -128,6 +171,7 @@ export default function UserManagementPage() {
             onSubmit={() => {
               // Handle form submission
               setIsEditUserDialogOpen(false);
+              fetchUsers(); // Refetch users after editing
             }}
             onCancel={() => setIsEditUserDialogOpen(false)}
           />
