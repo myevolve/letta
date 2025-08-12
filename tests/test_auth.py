@@ -2,6 +2,7 @@ from fastapi.testclient import TestClient
 import pytest
 import uuid
 from letta.server.rest_api.app import create_application
+from letta.orm.api_key import ApiKey
 from letta.orm.user import User
 from letta.orm.organization import Organization
 from letta.orm.tool import Tool
@@ -30,6 +31,7 @@ def client():
 def setup_and_teardown():
     """Clear all related tables before each test."""
     with db_registry.session() as session:
+        session.execute(delete(ApiKey))
         session.execute(delete(User))
         session.execute(delete(Tool))
         session.execute(delete(Block))
@@ -57,6 +59,7 @@ def setup_and_teardown():
     yield
 
     with db_registry.session() as session:
+        session.execute(delete(ApiKey))
         session.execute(delete(User))
         session.execute(delete(Tool))
         session.execute(delete(Block))
