@@ -65,7 +65,7 @@ const SignupPage = () => {
                 placeholder="m@example.com"
                 required
                 value={email}
-                onChange={(e) => setEmail(e.targe.value)}
+                onChange={(e) => setEmail(e.target.value)}
                 className="bg-black/20"
               />
             </div>
