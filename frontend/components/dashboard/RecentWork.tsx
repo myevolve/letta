@@ -29,7 +29,7 @@ const RecentWork = () => {
             </li>
           ))}
         </ul>
-      </ContentContent>
+      </CardContent>
     </Card>
   );
 };
