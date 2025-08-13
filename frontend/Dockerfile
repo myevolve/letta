@@ -4,8 +4,8 @@ WORKDIR /app
 
 # Copy package.json and lock file
 COPY package.json package-lock.json* ./
-# Install dependencies
-RUN npm install
+# Install dependencies, including dev dependencies needed for the build
+RUN npm install --include=dev
 
 # 2. Build the application
 FROM node:20-slim AS builder
