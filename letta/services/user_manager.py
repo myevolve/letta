@@ -105,6 +105,16 @@ class UserManager:
 
     @enforce_types
     @trace_method
+    async def update_user_password_async(self, user_id: str, new_password: str):
+        """Update a user's password."""
+        async with db_registry.async_session() as session:
+            existing_user = await UserModel.read_async(db_session=session, identifier=user_id)
+            existing_user.password = new_password
+            await existing_user.update_async(session)
+            await self._invalidate_actor_cache(user_id)
+
+    @enforce_types
+    @trace_method
     async def update_actor_async(self, user_update: UserUpdate) -> PydanticUser:
         """Update user details (async version)."""
         async with db_registry.async_session() as session:

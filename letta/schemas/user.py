@@ -59,3 +59,12 @@ class UserUpdate(UserBase):
     email: Optional[str] = Field(None, description="The new email of the user.")
     role: Optional[str] = Field(None, description="The new role of the user.")
     organization_id: Optional[str] = Field(None, description="The new organization id of the user.")
+
+
+class ForgotPasswordRequest(LettaBase):
+    email: str = Field(..., description="The email of the user who forgot their password.")
+
+
+class ResetPasswordRequest(LettaBase):
+    token: str = Field(..., description="The password reset token.")
+    new_password: str = Field(..., description="The new password.")

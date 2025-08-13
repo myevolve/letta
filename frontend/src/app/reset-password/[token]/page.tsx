@@ -12,10 +12,16 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
+import { useParams, useRouter } from "next/navigation";
 import { useState } from "react";
 
-export default function ForgotPasswordPage() {
-  const [email, setEmail] = useState("");
+export default function ResetPasswordPage() {
+  const router = useRouter();
+  const params = useParams();
+  const token = params.token as string;
+
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -24,23 +30,37 @@ export default function ForgotPasswordPage() {
     e.preventDefault();
     setError("");
     setMessage("");
+
+    if (password !== confirmPassword) {
+      setError("Passwords do not match");
+      return;
+    }
+
+    if (!token) {
+        setError("No reset token found. Please request a new reset link.");
+        return;
+    }
+
     setIsLoading(true);
 
     try {
-      const response = await fetch("/v1/auth/forgot-password", {
+      const response = await fetch("/v1/auth/reset-password", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ token, new_password: password }),
       });
 
       const data = await response.json();
 
       if (!response.ok) {
-        setError(data.detail || "Something went wrong");
+        setError(data.detail || "Something went wrong. The link may have expired.");
       } else {
-        setMessage(data.message);
+        setMessage(data.message + " Redirecting to login...");
+        setTimeout(() => {
+          router.push("/login");
+        }, 2000);
       }
     } catch (err) {
       if (err instanceof Error) {
@@ -58,23 +78,34 @@ export default function ForgotPasswordPage() {
       <Card className="w-full max-w-sm bg-black bg-opacity-20 border border-gray-700 backdrop-blur-lg rounded-xl">
         <form onSubmit={handleSubmit}>
           <CardHeader>
-            <CardTitle className="text-2xl">Forgot Password</CardTitle>
+            <CardTitle className="text-2xl">Reset Your Password</CardTitle>
             <CardDescription>
-              Enter your email to receive a password reset link.
+              Enter your new password below.
             </CardDescription>
           </CardHeader>
           <CardContent className="grid gap-4">
             <div className="grid gap-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="new-password">New Password</Label>
               <Input
-                id="email"
-                type="email"
-                placeholder="m@example.com"
+                id="new-password"
+                type="password"
                 required
                 disabled={isLoading}
                 className="bg-black bg-opacity-30 border-gray-600"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="confirm-password">Confirm New Password</Label>
+              <Input
+                id="confirm-password"
+                type="password"
+                required
+                disabled={isLoading}
+                className="bg-black bg-opacity-30 border-gray-600"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
               />
             </div>
             {error && <p className="text-red-500 text-sm px-1">{error}</p>}
@@ -82,12 +113,11 @@ export default function ForgotPasswordPage() {
           </CardContent>
           <CardFooter className="flex flex-col">
             <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? "Sending..." : "Send Reset Link"}
+              {isLoading ? "Resetting..." : "Reset Password"}
             </Button>
-            <div className="mt-4 text-center text-sm">
-              Remembered your password?{" "}
+             <div className="mt-4 text-center text-sm">
               <Link href="/login" className="underline">
-                Log In
+                Back to Log In
               </Link>
             </div>
           </CardFooter>
