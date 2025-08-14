@@ -24,7 +24,7 @@ const SignupPage = () => {
     setIsLoading(true);
     try {
       // As per the fixed logic, signup returns a token directly
-      const response = await axios.post('/api/v1/auth/signup', { name, email, password });
+      const response = await axios.post('/api/auth/signup', { name, email, password });
       const { access_token } = response.data;
       login(access_token);
       toast.success('Account created successfully!');
