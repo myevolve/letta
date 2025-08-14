@@ -44,8 +44,7 @@ services:
     depends_on:
       - letta_server
     environment:
-      - NODE_ENV=development # Use development to enable hot-reloading and proxy
-    command: npm run dev
+      - NODE_ENV=production
 volumes:
   pgdata:
 networks:
