@@ -38,6 +38,7 @@ from letta.server.rest_api.interface import StreamingServerInterface
 from letta.server.rest_api.middleware import CheckPasswordMiddleware, ProfilerContextMiddleware
 from letta.server.rest_api.routers.openai.chat_completions.chat_completions import router as openai_chat_completions_router
 from letta.server.rest_api.routers.v1 import ROUTERS as v1_routes
+from letta.server.rest_api.routers.v1.auth import router as auth_router
 from letta.server.rest_api.routers.v1.organizations import router as organizations_router
 from letta.server.rest_api.routers.v1.users import router as users_router  # TODO: decide on admin
 from letta.server.rest_api.static_files import mount_static_files
@@ -344,7 +345,8 @@ def create_application() -> "FastAPI":
     app.include_router(openai_chat_completions_router, prefix=OPENAI_API_PREFIX)
 
     # /api/auth endpoints
-    app.include_router(setup_auth_router(server, interface, random_password), prefix=API_PREFIX)
+    # app.include_router(setup_auth_router(server, interface, random_password), prefix=API_PREFIX)
+    app.include_router(auth_router, prefix=API_PREFIX)
 
     # / static files
     mount_static_files(app)
