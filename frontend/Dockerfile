@@ -6,8 +6,8 @@ WORKDIR /app
 COPY package.json package-lock.json* ./
 # Set NODE_ENV to development to ensure devDependencies are installed
 ENV NODE_ENV=development
-# Install dependencies
-RUN npm install
+# Install dependencies, ignoring peer dependency conflicts
+RUN npm install --legacy-peer-deps
 
 # 2. Build the application
 FROM node:20-slim AS builder

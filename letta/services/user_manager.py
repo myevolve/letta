@@ -72,7 +72,7 @@ class UserManager:
     def create_user(self, pydantic_user: PydanticUser) -> PydanticUser:
         """Create a new user if it doesn't already exist."""
         with db_registry.session() as session:
-            new_user = UserModel(id=pydantic_user.id, **pydantic_user.model_dump(to_orm=True, exclude={"id"}))
+            new_user = UserModel(**pydantic_user.model_dump(to_orm=True))
             new_user.create(session)
             return new_user.to_pydantic()
 
@@ -81,7 +81,7 @@ class UserManager:
     async def create_actor_async(self, pydantic_user: PydanticUser) -> PydanticUser:
         """Create a new user if it doesn't already exist (async version)."""
         async with db_registry.async_session() as session:
-            new_user = UserModel(id=pydantic_user.id, **pydantic_user.model_dump(to_orm=True, exclude={"id"}))
+            new_user = UserModel(**pydantic_user.model_dump(to_orm=True))
             await new_user.create_async(session)
             await self._invalidate_actor_cache(new_user.id)
             return new_user.to_pydantic()
@@ -102,16 +102,6 @@ class UserManager:
             # Commit the updated user
             existing_user.update(session)
             return existing_user.to_pydantic()
-
-    @enforce_types
-    @trace_method
-    async def update_user_password_async(self, user_id: str, new_password: str):
-        """Update a user's password."""
-        async with db_registry.async_session() as session:
-            existing_user = await UserModel.read_async(db_session=session, identifier=user_id)
-            existing_user.password = new_password
-            await existing_user.update_async(session)
-            await self._invalidate_actor_cache(user_id)
 
     @enforce_types
     @trace_method
@@ -162,20 +152,6 @@ class UserManager:
 
     @enforce_types
     @trace_method
-    def get_user_by_email(self, email: str) -> Optional[PydanticUser]:
-        """Fetch a user by email."""
-        with db_registry.session() as session:
-            stmt = select(UserModel).where(UserModel.email == email)
-            result = session.execute(stmt)
-            user = result.scalar_one_or_none()
-
-            if not user:
-                return None
-
-            return user.to_pydantic()
-
-    @enforce_types
-    @trace_method
     @async_redis_cache(key_func=lambda self, actor_id: f"actor_id:{actor_id}", model_class=PydanticUser)
     async def get_actor_by_id_async(self, actor_id: str) -> PydanticUser:
         """Fetch a user by ID asynchronously."""
@@ -186,20 +162,6 @@ class UserManager:
 
             if not user:
                 raise NoResultFound(f"User not found with id={actor_id}")
-
-            return user.to_pydantic()
-
-    @enforce_types
-    @trace_method
-    async def get_actor_by_email_async(self, email: str) -> Optional[PydanticUser]:
-        """Fetch a user by email asynchronously."""
-        async with db_registry.async_session() as session:
-            stmt = select(UserModel).where(UserModel.email == email)
-            result = await session.execute(stmt)
-            user = result.scalar_one_or_none()
-
-            if not user:
-                return None
 
             return user.to_pydantic()
 

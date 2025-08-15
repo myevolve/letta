@@ -8,7 +8,6 @@ from letta.schemas.user import User as PydanticUser
 
 if TYPE_CHECKING:
     from letta.orm import Job, Organization
-    from letta.orm.api_key import ApiKey
 
 
 class User(SqlalchemyBase, OrganizationMixin):
@@ -18,9 +17,9 @@ class User(SqlalchemyBase, OrganizationMixin):
     __pydantic_model__ = PydanticUser
 
     name: Mapped[str] = mapped_column(nullable=False, doc="The display name of the user.")
-    email: Mapped[str] = mapped_column(nullable=False, unique=True, doc="The email of the user.", server_default='')
-    password: Mapped[str] = mapped_column(nullable=False, doc="The hashed password of the user.", server_default='')
-    role: Mapped[str] = mapped_column(nullable=False, doc="The role of the user.", server_default='User')
+    email: Mapped[str] = mapped_column(nullable=False, unique=True, doc="The email of the user.")
+    hashed_password: Mapped[str] = mapped_column(nullable=False, doc="The hashed password of the user.")
+    role: Mapped[str] = mapped_column(nullable=False, default="User", doc="The role of the user (e.g., 'Admin', 'User').")
 
     # relationships
     organization: Mapped["Organization"] = relationship("Organization", back_populates="users")
@@ -28,4 +27,5 @@ class User(SqlalchemyBase, OrganizationMixin):
         "Job", back_populates="user", doc="the jobs associated with this user.", cascade="all, delete-orphan"
     )
 
-    api_keys: Mapped[List["ApiKey"]] = relationship("ApiKey", back_populates="user", cascade="all, delete-orphan")
+    # TODO: Add this back later potentially
+    # tokens: Mapped[List["Token"]] = relationship("Token", back_populates="user", doc="the tokens associated with this user.")
