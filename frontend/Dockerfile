@@ -1,25 +1,37 @@
-# Dockerfile for Next.js frontend
-
 # 1. Install dependencies
-FROM node:18-alpine AS deps
+FROM node:20-slim AS deps
 WORKDIR /app
-COPY frontend/package.json frontend/package-lock.json ./
+
+# Copy package.json and lock file
+COPY package.json package-lock.json* ./
+# Set NODE_ENV to development to ensure devDependencies are installed
+ENV NODE_ENV=development
+# Install dependencies
 RUN npm install
 
-# 2. Build the app
-FROM node:18-alpine AS builder
+# 2. Build the application
+FROM node:20-slim AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
-COPY frontend .
+COPY . .
+
+# Build the Next.js application
 RUN npm run build
 
-# 3. Run the app
-FROM node:18-alpine AS runner
+# 3. Run the application
+FROM node:20-slim AS runner
 WORKDIR /app
+
+ENV NODE_ENV=production
+
+# Automatically leverage output traces to reduce image size
+# https://nextjs.org/docs/advanced-features/output-file-tracing
 COPY --from=builder /app/public ./public
-COPY --from=builder /app/.next ./.next
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/package.json ./package.json
+COPY --from=builder /app/.next/standalone ./
+COPY --from=builder /app/.next/static ./.next/static
 
 EXPOSE 3000
-CMD ["npm", "start"]
+
+ENV PORT 3000
+
+CMD ["node", "server.js"]
