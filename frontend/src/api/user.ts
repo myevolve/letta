@@ -110,3 +110,18 @@ export const deleteUser = async (userId: string): Promise<{ success: boolean }> 
   }
   return { success: true };
 };
+
+export const createUser = async (userData: { name: string; email: string; role: 'User' | 'Admin' }): Promise<AdminUser> => {
+  await delay(400);
+  if (mockAdminUsers.some(u => u.email === userData.email)) {
+    throw new Error('User with this email already exists');
+  }
+  const newUser: AdminUser = {
+    id: String(mockAdminUsers.length + 10), // use a higher starting id to avoid collisions
+    ...userData,
+    status: 'Active',
+    lastLogin: new Date().toISOString(),
+  };
+  mockAdminUsers.push(newUser);
+  return newUser;
+};

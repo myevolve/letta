@@ -41,6 +41,7 @@ import {
 } from "@/components/ui/select"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { useState } from "react"
+import { toast } from "sonner"
 
 // Edit User Dialog Component
 function EditUserDialog({ user, onComplete }: { user: AdminUser, onComplete: () => void }) {
@@ -50,12 +51,12 @@ function EditUserDialog({ user, onComplete }: { user: AdminUser, onComplete: () 
   const mutation = useMutation({
     mutationFn: () => updateUserRole(user.id, role),
     onSuccess: () => {
+      toast.success("User updated successfully!")
       queryClient.invalidateQueries({ queryKey: ['adminUsers'] })
       onComplete()
     },
     onError: (error) => {
-      console.error("Failed to update user:", error)
-      alert("Failed to update user.")
+      toast.error("Failed to update user", { description: error.message })
       onComplete()
     }
   })
@@ -102,12 +103,12 @@ function DeleteUserDialog({ userId, onComplete }: { userId: string, onComplete: 
   const mutation = useMutation({
     mutationFn: () => deleteUser(userId),
     onSuccess: () => {
+      toast.success("User deleted successfully!")
       queryClient.invalidateQueries({ queryKey: ['adminUsers'] })
       onComplete()
     },
     onError: (error) => {
-      console.error("Failed to delete user:", error)
-      alert("Failed to delete user.")
+      toast.error("Failed to delete user", { description: error.message })
       onComplete()
     }
   })
