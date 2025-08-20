@@ -19,7 +19,6 @@ import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
 import { lettaClient } from "@/lib/letta-client"
 import { ToolManagerDialog } from "./tool-manager-dialog"
-import { ToolManagerDialog } from "./tool-manager-dialog"
 
 const agentSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -116,7 +115,7 @@ export default function AgentEditorPage({ params }: { params: { agentId: string 
           </div>
         </ResizablePanel>
       </ResizablePanelGroup>
-      <ToolManagerDialog isOpen={isToolManagerOpen} onOpenChange={setIsToolManagerOpen} />
+      <ToolManagerDialog isOpen={isToolManagerOpen} onOpenChange={setIsToolManagerOpen} agentId={agentId} />
     </form>
   )
 }

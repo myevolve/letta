@@ -1,36 +1,32 @@
 "use client"
 
 import { ColumnDef } from "@tanstack/react-table"
-import { LogEntry } from "./mock-log-data"
+import { Run } from "@letta-ai/letta-client/api/types"
 import { Badge } from "@/components/ui/badge"
 
-export const columns: ColumnDef<LogEntry>[] = [
+export const columns: ColumnDef<Run>[] = [
   {
-    accessorKey: "timestamp",
+    accessorKey: "created_at",
     header: "Timestamp",
     cell: ({ row }) => {
-      return new Date(row.getValue("timestamp")).toLocaleString()
+      return new Date(row.getValue("created_at")).toLocaleString()
     }
   },
   {
-    accessorKey: "agentName",
-    header: "Agent",
-  },
-  {
-    accessorKey: "userInput",
-    header: "User Input",
-  },
-  {
-    accessorKey: "agentResponse",
-    header: "Agent Response",
+    accessorKey: "agent_id",
+    header: "Agent ID",
   },
   {
     accessorKey: "status",
     header: "Status",
     cell: ({ row }) => {
       const status = row.getValue("status") as string
-      const variant = status === "Success" ? "default" : status === "Error" ? "destructive" : "secondary"
+      const variant = status === "completed" ? "default" : status === "failed" ? "destructive" : "secondary"
       return <Badge variant={variant}>{status}</Badge>
     }
+  },
+  {
+    accessorKey: "id",
+    header: "Run ID",
   },
 ]
