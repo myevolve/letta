@@ -12,12 +12,13 @@ import {
   ResizablePanel,
   ResizableHandle,
 } from "@/components/ui/resizable"
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card"
+import { AgentSimulator } from "./agent-simulator"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
 import { lettaClient } from "@/lib/letta-client"
+import { ToolManagerDialog } from "./tool-manager-dialog"
 import { ToolManagerDialog } from "./tool-manager-dialog"
 
 const agentSchema = z.object({
@@ -110,16 +111,8 @@ export default function AgentEditorPage({ params }: { params: { agentId: string 
         </ResizablePanel>
         <ResizableHandle withHandle />
         <ResizablePanel defaultSize={50}>
-          <div className="flex h-full items-center justify-center p-6">
-            <Card className="w-full h-full">
-              <CardHeader>
-                <CardTitle>Simulator</CardTitle>
-                <CardDescription>Test your agent's responses.</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p>Agent chat simulator would go here.</p>
-              </CardContent>
-            </Card>
+          <div className="h-full p-6">
+            <AgentSimulator agentId={agentId} />
           </div>
         </ResizablePanel>
       </ResizablePanelGroup>
